@@ -1,0 +1,31 @@
+name: Flutter Web 自动化部署
+
+# 触发条件：当代码推送到 main 分支时自动执行
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: ⬇️ 拉取最新代码
+        uses: actions/checkout@v3
+
+      - name: ⚙️ 搭建 Flutter 环境
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+
+      - name: 📦 获取依赖包
+        run: flutter pub get
+
+      - name: 🛠️ 编译 Web 静态产物
+        run: flutter build web --release --base-href "/ziwei_app/"
+
+      - name: 🚀 自动发布到 GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./build/web
